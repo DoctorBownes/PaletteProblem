@@ -262,11 +262,11 @@ int main(void) {
     //Setting up the window, along with safety checks
     SetupWindow();
 
-    //Setting up the vertices and UVs for the sprite
-    SetupVertexandUV();
-
     //Setting up the shaders, along with safety checks
     SetupShaders();
+
+    //Setting up the vertices and UVs for the sprite
+    SetupVertexandUV();
 
     //Setting up the sprite and palette data
     SetupSpriteandPalette();
