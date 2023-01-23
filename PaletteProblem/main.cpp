@@ -104,15 +104,15 @@ const char* fragment_shader =
 "uniform sampler1D myPaletteSampler;\n"
 "void main()\n"
 "{\n"
-"	vec4 index = texture2D(myTextureSampler, UV);\n"
-"	vec4 texel = texture(myPaletteSampler, index.r);\n"
-"	FragColor = texel;\n"
-//"	FragColor = texture2D(myTextureSampler, UV);\n"
+//"	vec4 index = texture2D(myTextureSampler, UV);\n"
+//"	vec4 texel = texture(myPaletteSampler, index.r);\n"
+//"	FragColor = texel;\n"
+"	FragColor = texture2D(myTextureSampler, UV);\n"
 "};\0";
 
 void SetupSpriteandPalette() {
-    //Drawing a smiley face
-    char spritecanvas[8 * 8]{
+    //Drawing a smiley face where: the body should be red, eyes should be green and mouth should be blue
+    char indexedsprite[8 * 8]{
         0,0,0,0,0,0,0,0,
         0,0,1,0,0,1,0,0,
         0,0,1,0,0,1,0,0,
@@ -127,13 +127,13 @@ void SetupSpriteandPalette() {
     glBindTexture(GL_TEXTURE_2D, TextureSampler);
 
     //For testing the sprite without using the palette, only un-comment when FragColor = texture2D(myTextureSampler, UV);
-    //for (int i = 0; i < 64; i++) {
-    //    spritecanvas[i] *= 127;
-    //}
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    for (int i = 0; i < 64; i++) {
+        indexedsprite[i] *= 85;
+    }
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 8, 0, GL_RED, GL_UNSIGNED_BYTE, spritecanvas);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 8, 0, GL_RED, GL_UNSIGNED_BYTE, indexedsprite);
     
     //Setting up a palette of four colors in an RGBA format
     char PaletteColors[4 * 4]{
