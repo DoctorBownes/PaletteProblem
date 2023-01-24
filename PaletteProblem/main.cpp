@@ -101,12 +101,11 @@ const char* fragment_shader =
 "in vec2 UV;\n"
 "out vec4 FragColor;\n"
 "uniform sampler2D myTextureSampler;\n"
-"uniform sampler2D myPaletteSampler;\n"
+"uniform sampler1D myPaletteSampler;\n"
 "void main()\n"
 "{\n"
-"	vec4 mors = texture2D(myTextureSampler, UV);\n"
-"   vec4 texel = texelFetch(myPaletteSampler, ivec2(mors.r * 255,0),0);\n"
-//"   FragColor = texel;\n"
+"	vec4 index = texture2D(myTextureSampler, UV);\n"
+"   vec4 texel = texelFetch(myPaletteSampler, int(index.r * 255),0);\n"
 "	FragColor = texel;\n"
 "};\0";
 
@@ -121,15 +120,6 @@ void SetupSpriteandPalette() {
         3,3,0,0,0,0,3,3,
         3,3,3,0,0,3,3,3,
         3,3,3,3,3,3,3,3,
-
-      // 0,0,0,0,0,0,0,0,
-      // 0,0,0,0,0,0,0,0,
-      // 0,0,0,0,0,0,0,0,
-      // 0,0,0,0,0,0,0,0,
-      // 0,0,0,0,0,0,0,0,
-      // 0,0,0,0,0,0,0,0,
-      // 0,0,0,0,0,0,0,0,
-      // 0,0,0,0,0,0,0,0,
     };
 
     //For testing the sprite without using the palette, only un-comment when FragColor = texture2D(myTextureSampler, UV);
@@ -174,10 +164,10 @@ void SetupSpriteandPalette() {
 
     glActiveTexture(GL_TEXTURE1);
     glGenTextures(1, &PaletteSampler);
-    glBindTexture(GL_TEXTURE_2D, PaletteSampler);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, PaletteColors);
+    glBindTexture(GL_TEXTURE_1D, PaletteSampler);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, PaletteColors);
     glUniform1i(glGetUniformLocation(shaderProgram, "myPaletteSampler"), 1);
 }
 
