@@ -87,8 +87,8 @@ GLuint PaletteSampler = 0;
 
 const char* vertex_shader =
 "#version 330 core\n"
-"layout(location = 0) in vec2 vertexPosition;\n"
-"layout(location = 1) in vec2 uvPosition;\n"
+"in vec2 vertexPosition;\n"
+"in vec2 uvPosition;\n"
 "out vec2 UV;\n"
 "void main()\n"
 "{\n"
@@ -101,42 +101,52 @@ const char* fragment_shader =
 "in vec2 UV;\n"
 "out vec4 FragColor;\n"
 "uniform sampler2D myTextureSampler;\n"
-"uniform sampler1D myPaletteSampler;\n"
+"uniform sampler2D myPaletteSampler;\n"
 "void main()\n"
 "{\n"
-"	vec4 index = texture2D(myTextureSampler, UV);\n"
-"	vec4 texel = texture(myPaletteSampler, index.r);\n"
+"	vec4 mors = texture2D(myTextureSampler, UV);\n"
+"   vec4 texel = texelFetch(myPaletteSampler, ivec2(mors.r * 255,0),0);\n"
+//"   FragColor = texel;\n"
 "	FragColor = texel;\n"
-//"	FragColor = texture2D(myTextureSampler, UV);\n"
 "};\0";
 
 void SetupSpriteandPalette() {
     //Drawing a smiley face where: the body should be red, eyes should be green and mouth should be blue
-    char indexedsprite[8 * 8]{
-        0,0,0,0,0,0,0,0,
-        0,0,1,0,0,1,0,0,
-        0,0,1,0,0,1,0,0,
-        0,0,0,0,0,0,0,0,
-        0,2,0,0,0,0,2,0,
-        0,2,2,2,2,2,2,0,
-        0,0,2,2,2,2,0,0,
-        0,0,0,0,0,0,0,0,
-    };
+    unsigned char indexedsprite[8 * 8]{
+        3,3,3,3,3,3,3,3,
+        3,3,2,3,3,2,3,3,
+        3,3,2,3,3,2,3,3,
+        3,3,3,3,3,3,3,3,
+        3,1,3,3,3,3,1,3,
+        3,3,0,0,0,0,3,3,
+        3,3,3,0,0,3,3,3,
+        3,3,3,3,3,3,3,3,
 
-    glGenTextures(1, &TextureSampler);
-    glBindTexture(GL_TEXTURE_2D, TextureSampler);
+      // 0,0,0,0,0,0,0,0,
+      // 0,0,0,0,0,0,0,0,
+      // 0,0,0,0,0,0,0,0,
+      // 0,0,0,0,0,0,0,0,
+      // 0,0,0,0,0,0,0,0,
+      // 0,0,0,0,0,0,0,0,
+      // 0,0,0,0,0,0,0,0,
+      // 0,0,0,0,0,0,0,0,
+    };
 
     //For testing the sprite without using the palette, only un-comment when FragColor = texture2D(myTextureSampler, UV);
     //for (int i = 0; i < 64; i++) {
     //    indexedsprite[i] *= 85;
     //}
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    glActiveTexture(GL_TEXTURE0);
+    glGenTextures(1, &TextureSampler);
+    glBindTexture(GL_TEXTURE_2D, TextureSampler);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 8, 8, 0, GL_RED, GL_UNSIGNED_BYTE, indexedsprite);
+    glUniform1i(glGetUniformLocation(shaderProgram, "myTextureSampler"), 0);
     
     //Setting up a palette of four colors in an RGBA format
-    char PaletteColors[4 * 4]{
+    unsigned char PaletteColors[4 * 4]{
         //RED
         255,
         0,
@@ -162,12 +172,13 @@ void SetupSpriteandPalette() {
         255,
     };
 
+    glActiveTexture(GL_TEXTURE1);
     glGenTextures(1, &PaletteSampler);
-    glBindTexture(GL_TEXTURE_1D, PaletteSampler);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, 12, 0, GL_RGBA, GL_UNSIGNED_BYTE, PaletteColors);
-
+    glBindTexture(GL_TEXTURE_2D, PaletteSampler);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, PaletteColors);
+    glUniform1i(glGetUniformLocation(shaderProgram, "myPaletteSampler"), 1);
 }
 
 void SetupShaders() {
@@ -253,6 +264,10 @@ void DrawSprite() {
         0,                  // stride
         (void*)0            // array buffer offset
     );
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, TextureSampler);
+    //glActiveTexture(GL_TEXTURE1);
+    //glBindTexture(GL_TEXTURE_2D, PaletteSampler);
     glDrawArrays(GL_TRIANGLES, 0, 6); // Starting from vertex 0; 3 vertices total -> 1 triangle
     glDisableVertexAttribArray(vertexPositionID);
     glDisableVertexAttribArray(uvPositionID);
